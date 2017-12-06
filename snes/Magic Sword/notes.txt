@@ -1,0 +1,14 @@
+Falchion sword = level 0 (boss)
+Samurai sword = level 4 (boss)
+Broad sword = level 12 (boss)
+Flame sword = level 24 (boss)
+Great sword = level 36 (boss)
+Thunder sword = level 43
+
+level 49 tem boss
+level 50 last boss
+
+Para pegar os parceiros, vincular a perda de uma chave na mesma fase.
+Ou seja, um hit count na chave com um ResetIf mudar de fase.
+
+score > 500k
