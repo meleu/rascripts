@@ -1,0 +1,9 @@
+Possible challenges:
+- Clearing levels under a specific time (could use music clock maybe?)
+- Clearing stages or groups of stages with extra swaps remaining
+- Clearing stages with the least amount of player movement. (could be impossible)
+- Arriving at unusual places on certain stages
+- Walking under all the skulls in Midnight
+- Breaking all the platforms on certain stages
+- Clear the game twice in a row (maybe)
+- Jump off the 5 ledges in Promenade safely
