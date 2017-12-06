@@ -12,3 +12,124 @@ Para pegar os parceiros, vincular a perda de uma chave na mesma fase.
 Ou seja, um hit count na chave com um ResetIf mudar de fase.
 
 score > 500k
+
+
+"Falchion"
+"Get the Falchion Sword"
+
+"Samurai Sword"
+"Get the Samurai Sword"
+
+"Broad Sword"
+"Get the Broad Sword"
+
+"Flame Sword"
+"Get the Flame Sword"
+
+"Great Sword"
+"Get the Great Sword"
+
+"Thunder Sword"
+"Get the Thunder Sword"
+
+"Buckler"
+"Get the Buckler Shield"
+
+"Kite Shield"
+"Get the Kite Shield"
+
+"Steel Tower"
+"Get the Steel Tower Shield"
+
+"Holy Shield"
+"Get the Holy Shield"
+
+"Magic Potion"
+"This Incriases Your Magic Power"
+
+"Scroll"
+"This Incriases Your Luck"
+
+"Crystal Ball"
+"This Reveals The Secret Treasures"
+
+"Gauntlet"
+"This Increases The Power of Your Partner"
+
+"Diamond Ring"
+"This Allows the LizardMan To Be Your Partner"
+
+"King's Crown"
+"This Gives You Magical Protection"
+
+"Golden Pot"
+"This Heals Your Partner"
+
+"Pendant"
+"This Doubles Your Score"
+
+"Power Stone"
+"This Boosts Attack, Defense and Magic"
+
+"The Number of the Beast"
+"Get 6 of Each Key"
+
+"Amazon"
+"Have the Amazon as your Partner"
+
+"Big Man"
+"Have the Big Man as your Partner"
+
+"Ninja"
+"Have the Ninja as your Partner"
+
+"Priest"
+"Have the Priest as your Partner"
+
+"Thief"
+"Have the Thief as your Partner"
+
+"Wizard"
+"Have the Wizard as your Partner"
+
+"Knight"
+"Have the Knight as your Partner"
+
+"LizardMan"
+"Have the LizardMan as your Partner"
+
+"Slay The Quimyra"
+"Wasn't it supposed to be Chimera?"
+
+"Slay The Gold Dragon"
+"He didn't put an end to your little adventure"
+
+"Slay The Skull Chimera"
+"He is not bored anymore because he is dead"
+
+"Slay The Celestial Serpents"
+"They aren't Hungry anymore because they're dead"
+
+"Slay The Hydra"
+"Still Shakin but at Least the Dragon is dead"
+
+"Slay Queen Chimera"
+"The Queen of Palette Swaps"
+
+"Slay Drokmar"
+"The King of Shadow is no more!"
+
+"The New Dark Lord"
+"Finish the Game with the Bad Ending"
+
+"The Brave One"
+"Finish the Game with the Good Ending"
+
+"The Lonely Dark Lord"
+"Finish the Game with the Bad Ending and without Partner"
+
+"The Legendary One"
+"Finish the Game with the Good Ending and with the First Sword"
+
+"Just Like the Cover"
+"Get to Floor 50 with an Level 8 Amazon as your Partner"
