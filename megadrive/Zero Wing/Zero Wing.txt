@@ -1,0 +1,116 @@
+// Zero Wing
+// #ID = 587
+
+function demoMode() => ...
+
+function levelId() => ...
+level1 = ...
+level2 = ...
+level3 = ...
+level4 = ...
+level5 = ...
+level6 = ...
+level7 = ...
+level8 = ...
+levelName = {
+    level1: "Natols"
+    level2: "Legrous"
+    level3: "Pleades"
+    level4: "Aquese"
+    level5: "Submarine Tunnel"
+    level6: "Barracade Zone"
+    level7: "Bellon"
+    level8: "Gerbarra"
+}
+
+function checkPoint() => ...
+introLevel = {
+    1: ...
+    2: ...
+    3: ...
+    4: ...
+    5: ...
+    6: ...
+    7: ...
+    8: ...
+}
+
+function weaponLevel() => ...
+function weapon() => ...
+weaponHoming = ...
+weaponLaser = ...
+weaponValcan = ...
+weaponName = {
+    weaponHoming: "Homing"
+    weaponLaser = "Laser"
+    weaponValcan = "Valcan"
+}
+
+function score() => ...
+function lives() => ...
+
+
+function livesDecreased() => lives() < prev(lives())
+
+function finishedLevel() {
+    // TODO
+    // Lembrar da proteÃ§Ã£o anti-cheating.
+}
+
+function cheevoNoDeathLevel(level) {
+    achievement(
+        title = "Finish "+ levelName[level] +" without losing a life",
+        points = 5,
+        trigger = 
+            once(checkPoint() == location[level]) &&
+            never(livesDecreased()) &&
+            finishedLevel(level)
+    )
+}
+
+
+function cheevoWeaponLevel3(wpn) {
+    achievement(
+        title = "Max "+ weaponName[wpn] +" unit from level 1 to 3 without changing your weapon",
+        points = 5,
+        trigger = 
+            once(weapon() == wpn) &&
+            once(weaponLevel() == ... ) && // level 1
+            once(weaponLevel() == ... ) && // level 2
+            weaponLevel() == ... && // level 3
+            never(weapon() != prev(weapon())) &&
+            never(demoMode())
+    )
+}
+
+function cheevoWeaponLevel4() {
+    achievement(
+        title = "Get the level 4 power up",
+        points = 5,
+        trigger =
+            once(weaponLevel() == ... ) && // level 1
+            once(weaponLevel() == ... ) && // level 2
+            once(weaponLevel() == ... ) && // level 3
+            once(weaponLevel() == ... ) && // level 4
+            never(demoMode())
+    )
+}
+
+
+function catZig() {
+    achievement(
+        title = "Have 9 lives or more",
+        points = 5,
+        trigger = lives() >= 9 && never(demoMode())
+    )
+}
+
+
+function hiScore(pts) {
+    // TODO: checar como que o score Ã© na memÃ³ria
+    achievement(
+        title = "Get a score higher than "+ score,
+        points = 5,
+        trigger = score() >= pts && never(demoMode())
+    )
+}
