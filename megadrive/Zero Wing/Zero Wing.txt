@@ -1,8 +1,9 @@
 // Zero Wing
 // #ID = 587
 
-function demoMode() => ...
+function demoMode() => bit7(0x0) != 0
 function cheatScreen() => ...
+function invincibilityCheat() => byte(0x0e4) == 1
 function difficulty() => byte(0x00a)
 
 function levelId() => byte(0x0e2)
@@ -61,14 +62,15 @@ function finishedLevel() {
 
 function cheevoNoDeathLevel(level) {
     achievement(
-        title = "Finish "+ levelName[level] +" starting with no powerups and without losing a life (use secret menu)",
+        title = "Finish "+ levelName[level] +" without losing a life and starting with no powerups (use secret menu)",
         points = 5,
         trigger = 
             once(checkPoint() == introLevel[level]) &&
             once(weaponLevel() == 0)
             finishedLevel(level) &&
             never(livesDecreased()) &&
-            never(cheatScreen())
+            never(cheatScreen()) &&
+            never(invincibilityCheat())
     )
 }
 
