@@ -2,8 +2,10 @@
 // #ID = 587
 
 function demoMode() => ...
+function cheatScreen() => ...
+function difficulty() => byte(0x00a)
 
-function levelId() => ...
+function levelId() => byte(0x0e2)
 level1 = ...
 level2 = ...
 level3 = ...
@@ -35,11 +37,11 @@ introLevel = {
     8: ...
 }
 
-function weaponLevel() => ...
-function weapon() => ...
-weaponHoming = ...
-weaponLaser = ...
-weaponValcan = ...
+function weaponLevel() => byte(0x136)
+function weapon() => byte(0x162)
+weaponHoming = 0
+weaponLaser = 1
+weaponValcan = 2
 weaponName = {
     weaponHoming: "Homing"
     weaponLaser = "Laser"
@@ -47,7 +49,7 @@ weaponName = {
 }
 
 function score() => ...
-function lives() => ...
+function lives() => byte(0x0fc)
 
 
 function livesDecreased() => lives() < prev(lives())
@@ -59,12 +61,14 @@ function finishedLevel() {
 
 function cheevoNoDeathLevel(level) {
     achievement(
-        title = "Finish "+ levelName[level] +" without losing a life",
+        title = "Finish "+ levelName[level] +" starting with no powerups and without losing a life (use secret menu)",
         points = 5,
         trigger = 
-            once(checkPoint() == location[level]) &&
+            once(checkPoint() == introLevel[level]) &&
+            once(weaponLevel() == 0)
+            finishedLevel(level) &&
             never(livesDecreased()) &&
-            finishedLevel(level)
+            never(cheatScreen())
     )
 }
 
@@ -75,9 +79,9 @@ function cheevoWeaponLevel3(wpn) {
         points = 5,
         trigger = 
             once(weapon() == wpn) &&
-            once(weaponLevel() == ... ) && // level 1
-            once(weaponLevel() == ... ) && // level 2
-            weaponLevel() == ... && // level 3
+            once(weaponLevel() == 1) &&
+            once(weaponLevel() == 2) &&
+            weaponLevel() == 3 &&
             never(weapon() != prev(weapon())) &&
             never(demoMode())
     )
@@ -88,9 +92,9 @@ function cheevoWeaponLevel4() {
         title = "Get the level 4 power up",
         points = 5,
         trigger =
-            once(weaponLevel() == ... ) && // level 1
-            once(weaponLevel() == ... ) && // level 2
-            once(weaponLevel() == ... ) && // level 3
+            once(weaponLevel() == 1) &&
+            once(weaponLevel() == 2) &&
+            once(weaponLevel() == 3) &&
             once(weaponLevel() == ... ) && // level 4
             never(demoMode())
     )
