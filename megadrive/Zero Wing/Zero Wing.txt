@@ -67,7 +67,7 @@ function cheevoNoDeathLevel(level) {
         title = "Finish "+ levelName[level] +" without losing a life and starting with no powerups (use secret menu)",
         points = 5,
         trigger = 
-            once(checkPoint() == introLevel[level]) &&
+            once(checkPoint() == startLevel[level]) &&
             once(weaponLevel() == 0)
             finishedLevel(level) &&
             never(livesDecreased()) &&
