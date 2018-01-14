@@ -54,7 +54,7 @@ function livesDecreased() => lives() < prev(lives())
 
 function finishedLevel() {
     // TODO
-    // Lembrar da proteÃ§Ã£o anti-cheating.
+    // Lembrar da proteção anti-cheating.
 }
 
 function cheevoNoDeathLevel(level) {
@@ -107,7 +107,7 @@ function catZig() {
 
 
 function hiScore(pts) {
-    // TODO: checar como que o score Ã© na memÃ³ria
+    // TODO: checar como que o score é na memória
     achievement(
         title = "Get a score higher than "+ score,
         points = 5,
