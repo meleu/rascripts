@@ -1,0 +1,46 @@
+possíveis cheevos (por enquanto são apenas ideias):
+
+- coletar certa quantidade de photons [não precisa, já tem no set atual]
+
+- cheevos relacionado a tempo como terminar fase X em menos de T minutos
+
+- perfect bonus round - sobreviver por um minuto (ganha 25000 pontos)
+
+- VectorCat: 9 vidas
+
+- armas (matar X inimigos)
+  - Rapid Fire - arma, tiro rápido e que ricocheteia
+  - Wave - arma, tiro que espalha
+  - Bolo - arma, tiro lento, mas que passa pelos inimigos
+
+- outros powerups (coletar X vezes)
+  - Nucleus Shield - proteção temporária
+  - Orb - mata todo mundo na tela
+
+- Transformações
+  - drill - pode quebrar alguns pisos
+  - fish - se move mais rápido na água
+  - missile - através do teto?
+  - buggy - quebrar paredes
+  - bomb - destrói a porra toda
+  - jet - voar
+  - parachute - cai lentamente
+
+- na fase 4 existem dois caminhos (vale a pena fazer um cheevo para cada caminho?).
+
+- pegar todas as life+ orbs
+
+- terminar o jogo sem pegar life+ orbs
+
+- easter eggs
+  - blow up SEGA logo
+  - level warp
+
+
+IMPORTANTE!!
+
+- bloquear cheat de Debug Mode
+- bloquear cheat the full health
+- bloquear cheat de invencibilidade
+- bloquear cheat the slow motion
+
