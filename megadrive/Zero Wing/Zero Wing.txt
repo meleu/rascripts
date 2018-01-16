@@ -177,3 +177,34 @@ achievement(
         never(demoMode())
 )
 
+
+// LEADERBOARDS --------------------------------------------------------------
+
+difficultyName = {
+    0: easy,
+    1: normal,
+    2: hard
+}
+
+function leaderboardScore(dif) {
+    leaderboard(
+        title = "High Score on regular gameplay - "+ diffcultyName[dif],
+        description = "High Score on normal gameplay until game over screen - "+ difficultyName[dif],
+        start = difficulty() == dif && levelId() == level1 && levelStart(),
+        cancel = cheatScreen(),
+        submit = gameOverScreen(),
+        value = 
+            score10e8() * 100000000 +
+            score10e7() * 10000000 +
+            score10e6() * 1000000 +
+            score10e5() * 100000 +
+            score10e4() * 10000 +
+            score10e3() * 1000 +
+            score10e2() * 100 +
+            score10e1() * 10
+        // that VAL using BCD: d0xf1*10000000+d0xf0*100000+d0xf3*1000+d0xf2*10
+    )
+}
+leaderboardScore(0)
+leaderboardScore(1)
+leaderboardScore(2)
