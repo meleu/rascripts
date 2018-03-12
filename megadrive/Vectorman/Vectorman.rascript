@@ -8,6 +8,21 @@ function normalOrAbove() => never(difficulty() == 0)
 // $E88E: bit0: demo
 function noDemo() => never(bit0(0xe88e) == 1)
 
+// $e358: screen Coordinate X
+// $e35a  screen Coordinate Y
+function screenX() => word(0xe358)
+function screenY() => word(0xe35a)
+
+// $E874: on-stage collected photons
+// $E876: total on-stage photons
+function photons() => byte(0xe874)
+function totalPhotons() => byte(0xe876)
+
+// $E88C: total TVs on stage
+// $E88D: TVs destroyed
+function destroyedTVs() => byte(0xe88d)
+function totalTVs() => byte(0xe88c)
+
 // $C47F: Stage
 //        00=stage 1 xxxx 09=stage 10
 //        10=Segascreen
@@ -57,16 +72,12 @@ function scoreX2e16() => word(0xe864)
 // $E878: Health Balls
 function health() => byte(0xe878)
 
-// $E874: Photons?
-function photons() => byte(0xe874)
-
 // $E886: special weapon ammunition
-
-// $E88D: TVs destroyed
-function destroyedTVs() => byte(0xe88d)
 
 // $E890: timer seconds
 // $E891: timer minutes
+function timerSeconds() => byte(0xe890)
+function timerMinutes() => byte(0xe891)
 
 
 // cheat codes ----------------------------------------------------------------
@@ -94,12 +105,10 @@ function cheatHealth() => abracadabr_a() == 0x0a
 
 // $E8A9: [Cheat]
 //        07=CALLACA_B
-// $E8B7: [Cheats]
+// $E898: [Cheats]
 //        ff=Invisibility ??
-// $E360: [Cheat]
-//        (16bit) 0000 = invisible
 function callaca_b() => byte(0xe8a9)
-function cheatInvisible() => word(0xe360) == 0
+function cheatInvisible() => byte(0xe898) == 0x28
 
 // $E8AE: [Cheat]
 //        06=DRACUL_A
@@ -146,22 +155,22 @@ function finishLevel(level) {
             && normalOrAbove() && noCheats() && noDemo()
     )
 }
-finishLevel(0)
-finishLevel(1)
-finishLevel(2)
-finishLevel(3)
-finishLevel(4)
-finishLevel(5)
-finishLevel(6)
-finishLevel(7)
-finishLevel(8)
-finishLevel(9)
-finishLevel(10)
-finishLevel(11)
-finishLevel(12)
-finishLevel(13)
-finishLevel(14)
-finishLevel(15)
+finishLevel(level1)
+finishLevel(level2)
+finishLevel(level3)
+finishLevel(level4)
+finishLevel(level5)
+finishLevel(level6)
+finishLevel(level7)
+finishLevel(level8)
+finishLevel(level9)
+finishLevel(level10)
+finishLevel(level11)
+finishLevel(level12)
+finishLevel(level13)
+finishLevel(level14)
+finishLevel(level15)
+finishLevel(level16)
     
 
 // lives ----------------------------------------------------------------------
@@ -188,7 +197,6 @@ achievement(
 //        Caught
 function caughtLetters() => byte(0xe2e8)
 
-
 function levelWarp(num) {
     if(num == 5)  {
         pts = 5
@@ -204,12 +212,11 @@ function levelWarp(num) {
         trigger = segaScreen() && caughtLetters() >= letters
     )
 }
-
 levelWarp(5)
 levelWarp(10)
 //-----------------------------------------------------------------------------
 
-// weapons --------------------------------------------------------------------
+// items ----------------------------------------------------------------------
 
 // $E390: weapon
 //        1 = rapidfire
@@ -227,8 +234,8 @@ weaponName = {
     rapidfire:  "Rapidfire",
     wave:       "Wave",
     bolo:       "Bolo",
-    orb:	"Orb",
-    shield:	"Shield"
+    orb:        "Orb",
+    shield:     "Shield"
 }
 
 function weaponCheevo(wpn) {
@@ -237,7 +244,7 @@ function weaponCheevo(wpn) {
         description = "Destroy 10 TVs while using "+ weaponName[wpn] +" weapon",
         points = 5,
         trigger =
-	    repeated(11, destroyedTVs() > prev(destroyedTVs()))
+	        repeated(11, destroyedTVs() > prev(destroyedTVs()))
             && unless(prev(weapon()) != wpn)
             && (
                 noCheats() && noDemo()
@@ -255,7 +262,7 @@ function collectItem(wpn) {
         description = "Collect the "+ weaponName[wpn] +" 5 times",
         points = 5,
         trigger = 
-	    repeated(5, weapon() == wpn)
+            repeated(5, weapon() == wpn)
             && unless(prev(weapon()) == wpn)
             && (
                 noCheats() && noDemo()
@@ -266,35 +273,181 @@ function collectItem(wpn) {
 collectItem(orb)
 collectItem(shield)
 
+
+// $E87A: max health
+function maxHealth() => byte(0xe87a)
+
+achievement(
+    title = "Life+ Orbs",
+    description = "Collect 5 Life+ Orbs",
+    points = 5,
+    trigger =
+        maxHealth() >= 8
+        && repeated(5, maxHealth() > prev(maxHealth()))
+        && normalOrAbove() && noCheats() && noDemo()
+)
+//-----------------------------------------------------------------------------
+
+// Vectorman transformations --------------------------------------------------
+// $e394: (16bit) Vectorman form - e79e=Jet, e3b2=Bomb, db44=Drill, f36e=Buggy, eab0=Fish
+function vectorForm() => word(0xe394)
+
+drill = 0xdb44
+fish = 0xeab0
+buggy = 0xf36e
+bomb = 0xe3b2
+jet = 0xe79e
+parachute = 0xf05a
+missile = 0xeee2
+formName = {
+    drill:  "Drill",
+    fish:   "Fish",
+    buggy:  "Buggy",
+    bomb:   "Bomb",
+    jet:    "Jet",
+    parachute: "Parachute",
+    missile: "Missile"
+}
+
+function transformation(form) {
+    times = 5
+
+    if(form == buggy || form == jet)
+        times = 3
+    else if(form == parachute)
+        times = 2
+
+    achievement(
+        title = formName[form] +" Form",
+        description = "Get the "+ formName[form] +" transformation "+ times +" times",
+        points = 5,
+        trigger =
+            repeated(times, vectorForm() == form)
+            && unless(prev(vectorForm()) == form)
+            && (
+                noCheats() && noDemo()
+                || byte(0) == byte(0)
+            )
+    )
+}
+transformation(drill)
+transformation(fish)
+transformation(buggy)
+transformation(bomb)
+transformation(jet)
+transformation(parachute)
+
+achievement(
+    title = "Missile Form",
+    description = "Get the Missile transformation",
+    points = 5,
+    trigger =
+        vectorForm() == missile
+        && never(levelId() != level4)
+        && noCheats() && noDemo()
+)
 //-----------------------------------------------------------------------------
 
 
-//- perfect bonus round - sobreviver por um minuto (ganha 25000 pontos)
+// completionist --------------------------------------------------------------
+achievement(
+    title = "Rage Against the TVs",
+    description = "Destroy all TVs in a stage - stage select allowed",
+    points = 5,
+    trigger =
+        destroyedTVs() == totalTVs()
+        && never(totalTVs() == 0)
+        && prev(destroyedTVs()) < destroyedTVs()
+        && prev(totalTVs()) == totalTVs()
+        && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
+)
 
-//- Transformações
-//  - drill - pode quebrar alguns pisos
-//  - fish - se move mais rÃ¡pido na Ã¡gua
-//  - missile - atravÃ©s do teto?
-//  - buggy - quebrar paredes
-//  - bomb - destrÃ³i a porra toda
-//  - jet - voar
-//  - parachute - cai lentamente
-//
-//- na fase 4 existem dois caminhos (vale a pena fazer um cheevo para cada caminho?).
-//
-//- pegar todas as life+ orbs
+achievement(
+    title = "Photon Collector",
+    description = "Collect all photons in a stage - stage select allowed",
+    points = 5,
+    trigger =
+        photons() == totalPhotons()
+        && never(totalPhotons() == 0)
+        && prev(photons()) < photons()
+        && prev(totalPhotons()) == totalPhotons()
+        && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
+)
+
+
+// function photonCollector(level) {
+//     achievement(
+//         title = levelName[level] +" Photon Collector",
+//         description = "Collect all photons on "+ levelName[level] +" - cheats allowed, but not required",
+//         points = 10,
+//         trigger =once(byte(0) == byte(0))&&
+//             photons() == totalPhotons()
+//             && never(levelId() != level)
+//             && noDemo()
+//     )
+// }
+// photonCollector(level1)
+// photonCollector(level3)
+// photonCollector(level4)
+// photonCollector(level5)
+// photonCollector(level6)
+// photonCollector(level8)
+// photonCollector(level9)
+// photonCollector(level10)
+// photonCollector(level12)
+// photonCollector(level13)
+// photonCollector(level14)
+// photonCollector(level15)
+// 
+// function destroyAllTVs(level) {
+//     achievement(
+//         title = "No TVs in "+ levelName[level],
+//         description = "Destroy all TVs in "+ levelName[level] +" - cheats allowed, but not required",
+//         points = 10,
+//         trigger =once(byte(0) == byte(0))&&
+//             destroyedTVs() == totalTVs()
+//             && never(levelId() != level)
+//             && noDemo()
+//     )
+// }
+// destroyAllTVs(level1)
+// destroyAllTVs(level3)
+// destroyAllTVs(level4)
+// destroyAllTVs(level5)
+// destroyAllTVs(level6)
+// destroyAllTVs(level8)
+// destroyAllTVs(level9)
+// destroyAllTVs(level10)
+// destroyAllTVs(level12)
+// destroyAllTVs(level13)
+// destroyAllTVs(level14)
+// destroyAllTVs(level15)
+//-----------------------------------------------------------------------------
+
+// bonus stage ----------------------------------------------------------------
+achievement(
+    title = "Perfect Bonus",
+    description = "Survive for 1 minute on the Bonus Stage",
+    points = 15,
+    trigger = 
+        never(levelId() == 0xff)
+        && once(timerMinutes() == 1)
+        && repeated(59, timerSeconds() < prev(timerSeconds()))
+        && timerSeconds() == 0
+)
+//-----------------------------------------------------------------------------
+
+achievement(
+    title = "no cheats",
+    description = "no cheats template",
+    points = 1,
+    trigger = once(byte(0) == byte(0)) && normalOrAbove() && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
+)
+
+//- perfect bonus round - sobreviver por um minuto (ganha 25000 pontos)
 //
 //- terminar o jogo sem pegar life+ orbs
 //
-
-
-
-
-
-
-
-
-
 
 
 
