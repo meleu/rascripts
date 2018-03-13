@@ -5,6 +5,9 @@
 function difficulty() => byte(0x001b)
 function normalOrAbove() => never(difficulty() == 0)
 
+// TODO: address!
+function defaultHealth() => byte(0x0)
+
 // $E88E: bit0: demo
 function noDemo() => never(bit0(0xe88e) == 1)
 
@@ -26,7 +29,7 @@ function totalTVs() => byte(0xe88c)
 // $C47F: Stage
 //        00=stage 1 xxxx 09=stage 10
 //        10=Segascreen
-//        ff=Menu
+//        ff=Menu or Bonus Stage
 function levelId() => byte(0xc47f)
 function segaScreen() => levelId() == 0x10
 level1 = 0
@@ -141,8 +144,8 @@ achievement(
 )
 //-----------------------------------------------------------------------------
 
-// progress-based -------------------------------------------------------------
 
+// progress-based -------------------------------------------------------------
 function finishLevel(level) {
     achievement(
         title = "Finished "+ levelName[level],
@@ -171,6 +174,7 @@ finishLevel(level13)
 finishLevel(level14)
 finishLevel(level15)
 finishLevel(level16)
+//-----------------------------------------------------------------------------
     
 
 // lives ----------------------------------------------------------------------
@@ -189,7 +193,7 @@ achievement(
 //-----------------------------------------------------------------------------
 
 
-// SEGA LOGO EASTER EGGS ------------------------------------------------------
+// SEGA logo easter eggs ------------------------------------------------------
 
 // $E2EA: [Sega logo]
 //        Total
@@ -318,7 +322,7 @@ function transformation(form) {
         times = 2
 
     achievement(
-        title = formName[form] +" Form",
+        title = formName[form] +" Morph",
         description = "Get the "+ formName[form] +" transformation "+ times +" times",
         points = 5,
         trigger =
@@ -338,7 +342,7 @@ transformation(jet)
 transformation(parachute)
 
 achievement(
-    title = "Missile Form",
+    title = "Missile Morph",
     description = "Get the Missile transformation",
     points = 5,
     trigger =
@@ -359,6 +363,8 @@ achievement(
         && never(totalTVs() == 0)
         && prev(destroyedTVs()) < destroyedTVs()
         && prev(totalTVs()) == totalTVs()
+        && once(destroyedTVs() == 0)
+        && never(levelId() != prev(levelId()))
         && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
 )
 
@@ -371,57 +377,67 @@ achievement(
         && never(totalPhotons() == 0)
         && prev(photons()) < photons()
         && prev(totalPhotons()) == totalPhotons()
+        && once(photons() == 0)
+        && never(levelId() != prev(levelId()))
         && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
 )
 
 
-// function photonCollector(level) {
-//     achievement(
-//         title = levelName[level] +" Photon Collector",
-//         description = "Collect all photons on "+ levelName[level] +" - cheats allowed, but not required",
-//         points = 10,
-//         trigger =once(byte(0) == byte(0))&&
-//             photons() == totalPhotons()
-//             && never(levelId() != level)
-//             && noDemo()
-//     )
-// }
-// photonCollector(level1)
-// photonCollector(level3)
-// photonCollector(level4)
-// photonCollector(level5)
-// photonCollector(level6)
-// photonCollector(level8)
-// photonCollector(level9)
-// photonCollector(level10)
-// photonCollector(level12)
-// photonCollector(level13)
-// photonCollector(level14)
-// photonCollector(level15)
-// 
-// function destroyAllTVs(level) {
-//     achievement(
-//         title = "No TVs in "+ levelName[level],
-//         description = "Destroy all TVs in "+ levelName[level] +" - cheats allowed, but not required",
-//         points = 10,
-//         trigger =once(byte(0) == byte(0))&&
-//             destroyedTVs() == totalTVs()
-//             && never(levelId() != level)
-//             && noDemo()
-//     )
-// }
-// destroyAllTVs(level1)
-// destroyAllTVs(level3)
-// destroyAllTVs(level4)
-// destroyAllTVs(level5)
-// destroyAllTVs(level6)
-// destroyAllTVs(level8)
-// destroyAllTVs(level9)
-// destroyAllTVs(level10)
-// destroyAllTVs(level12)
-// destroyAllTVs(level13)
-// destroyAllTVs(level14)
-// destroyAllTVs(level15)
+function photonCollector(level) {
+    achievement(
+        title = levelName[level] +" Photon Collector",
+        description = "Collect all photons on "+ levelName[level] +" - cheats allowed, but not required",
+        points = 10,
+        trigger =
+            photons() == totalPhotons()
+                && never(totalPhotons() == 0)
+                && prev(photons()) < photons()
+                && prev(totalPhotons()) == totalPhotons()
+                && once(photons() == 0)
+                && never(levelId() != level)
+                && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
+    )
+}
+photonCollector(level1)
+photonCollector(level3)
+photonCollector(level4)
+photonCollector(level5)
+photonCollector(level6)
+photonCollector(level8)
+photonCollector(level9)
+photonCollector(level10)
+photonCollector(level12)
+photonCollector(level13)
+photonCollector(level14)
+photonCollector(level15)
+
+function destroyAllTVs(level) {
+    achievement(
+        title = "No TVs in "+ levelName[level],
+        description = "Destroy all TVs in "+ levelName[level] +" - cheats allowed, but not required",
+        points = 10,
+        trigger =
+            destroyedTVs() == totalTVs()
+            && never(totalTVs() == 0)
+            && prev(destroyedTVs()) < destroyedTVs()
+            && prev(totalTVs()) == totalTVs()
+            && once(destroyedTVs() == 0)
+            && never(levelId() != level)
+            && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
+    )
+}
+destroyAllTVs(level1)
+destroyAllTVs(level3)
+destroyAllTVs(level4)
+destroyAllTVs(level5)
+destroyAllTVs(level6)
+destroyAllTVs(level8)
+destroyAllTVs(level9)
+destroyAllTVs(level10)
+destroyAllTVs(level12)
+destroyAllTVs(level13)
+destroyAllTVs(level14)
+destroyAllTVs(level15)
 //-----------------------------------------------------------------------------
 
 // bonus stage ----------------------------------------------------------------
@@ -430,24 +446,21 @@ achievement(
     description = "Survive for 1 minute on the Bonus Stage",
     points = 15,
     trigger = 
-        never(levelId() == 0xff)
-        && once(timerMinutes() == 1)
+        once(timerMinutes() == 1)
+        && timerMinutes() == 0
         && repeated(59, timerSeconds() < prev(timerSeconds()))
         && timerSeconds() == 0
+        && never(defaultHealth() > 5)
+        && never(levelId() == 0xff)
 )
 //-----------------------------------------------------------------------------
 
 achievement(
-    title = "no cheats",
+    title = "NO CHEATS TEMPLATE",
     description = "no cheats template",
     points = 1,
     trigger = once(byte(0) == byte(0)) && normalOrAbove() && noDemo() && never(cheatInvisible()) && never(cheatSlow()) && never(cheatHealth())
 )
-
-//- perfect bonus round - sobreviver por um minuto (ganha 25000 pontos)
-//
-//- terminar o jogo sem pegar life+ orbs
-//
 
 
 
@@ -456,33 +469,46 @@ achievement(
 //    id = 109, badge = "00192", published = "02/03/2013 01:37:12", modified = "02/03/2013 02:39:40",
 //    trigger = word(0x00E864) >= 0x0001 && word(0x00E866) >= 0x86A0 && never(byte(0x00E88E) == 0x01)
 //)
-//
-//achievement(
-//    title = "Energised", description = "Collect over 200 Photons in total", points = 10,
-//    id = 110, badge = "00080", published = "02/03/2013 01:45:21", modified = "10/06/2016 19:26:29",
-//    trigger = never(byte(0x00E88E) == 0x01) && word(0x00E874) >= 0x00C8
-//)
-//
+
+
+// TODO -----------------------------------------------------------------------
+
 //achievement(
 //    title = "Tidal Surge", description = "Reach Day 3", points = 10,
 //    id = 111, badge = "00193", published = "02/03/2013 01:57:27", modified = "02/03/2013 02:39:45",
 //    trigger = word(0x00AF70) == 0x000D && never(byte(0x00E88E) == 0x01)
 //)
-//
+// TODO: pegar a logica do meu "Finish Metalhead" e colocar neste cheevo.
+
+
 //achievement(
 //    title = "Satellite", description = "Destroy all TVs in the first level", points = 30,
 //    id = 112, badge = "00136", published = "02/03/2013 02:02:01", modified = "25/01/2015 11:31:59",
 //    trigger = byte(0x00E88D) == 0x1E && byte(0x00AF70) == 0x30 && never(byte(0x00E88E) == 0x01)
 //)
-//
+// TODO: pegar a logica do meu "Rage Against the TVs" e colocar neste cheevo.
+
+
+// Demotions ------------------------------------------------------------------
+
+//achievement(
+//    title = "Energised", description = "Collect over 200 Photons in total", points = 10,
+//    id = 110, badge = "00080", published = "02/03/2013 01:45:21", modified = "10/06/2016 19:26:29",
+//    trigger = never(byte(0x00E88E) == 0x01) && word(0x00E874) >= 0x00C8
+//)
+// Demoted this achievement because the address keep track only of collected "on-stage photons", not those dropped by defeated enemies. Plus, the counter resets when after finishing a stage. The similar cheevo I added is [ach=Photon Collector].
+
 //achievement(
 //    title = "Cleanup Operation", description = "Complete the first level within 2 minutes", points = 20,
 //    id = 114, badge = "00186", published = "02/03/2013 17:59:58", modified = "02/03/2013 18:02:51",
 //    trigger = byte(0x00E87E) == 0x1C && word(0x00E890) >= 0x0300 && byte(0x00AF70) == 0x30
 //)
-//
+// Demoted this cheevo because if you die, you respawn with the timer "reloaded". Then if you die on a boss, it'll be pretty easy to finish the stage before the timer becomes lower than 2 minutes.
+
 //achievement(
 //    title = "Square Eyes", description = "Destroy 10 TVs", points = 15,
 //    id = 108, badge = "00191", published = "02/03/2013 01:28:14", modified = "02/03/2013 02:38:51",
 //    trigger = never(byte(0x00E88E) == 0x01) && byte(0x00E88D) >= 0x0A
 //)
+// Demoted this cheevo and added similar ones that require using a specific weapon.
+
