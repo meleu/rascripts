@@ -14,8 +14,20 @@ true = 1
 //        6 = 30
 //        7 = 40
 //        b = infinite shurikins (cheat)
-function fiftyOrLessShurikins() => high4(0x0000) < 1 || high4(0x0000) > 2
+function defShurikins() => high4(0x0000)
 function infiniteShurikins() => high4(0x0000) == 0xb
+
+defShurikinsAmount = {
+     0: 0x3,
+    10: 0x4,
+    20: 0x5,
+    30: 0x6,
+    40: 0x7,
+    50: 0x0,
+    60: 0x1,
+    70: 0x2,
+    999: 0x0b,
+}
 
 // $0000: Lower4 = Difficulty
 //        0 = Normal (default)
@@ -23,7 +35,7 @@ function infiniteShurikins() => high4(0x0000) == 0xb
 //        a = Hard
 //        f = Expert
 function normalOrAbove() => low4(0x0000) != 5
-function expert() => low4(0x0000) == 0xf
+function expertMode() => low4(0x0000) == 0xf
 
 // $000A: invincibility cheat = 52
 function invincibilityCheat() => byte(0x000a) == 0x52
@@ -55,7 +67,7 @@ function roundClear() => nextRound() > round()
 
 // $37B1: Continue (default is 3)
 function continuesLeft() => byte(0x37b1)
-function noContinues() => continuesLeft == 3
+function noContinues() => once(continuesLeft()) == 3 && never(continuesLeft() < prev(continuesLeft()))
 
 
 // $37B6: (16bit) score x10e4
@@ -169,7 +181,7 @@ bossHealth = {
 
 
 
-// FINISH EACH ROUND
+// FINISH EACH ROUND [NO NINJITSU]
 // ============================================================================
 
 roundName = {
@@ -193,13 +205,14 @@ function finishRound(round, noJitsu) {
       && noCheats()
 
   if(round == 7) {
+      desc = desc +" and beat the game"
       requirements = requirements && bossHealth[round] > 0xf0
   } else {
       requirements = requirements && bossHealth[round] == 0
   }
 
   
-  if(noJitsu == 1) {
+  if(noJitsu == true) {
       name = "Nojitsu "+ round
       desc = desc +" without using Ninjitsu"
       requirements = requirements && noNinjitsu
@@ -229,34 +242,102 @@ finishRound(6, true)
 finishRound(7, true)
 
 
+// BEAT THE GAME [NO NINJITSU / EXPERT + NO CONTINUES]
+// ============================================================================
+
+for round in range(1, 7) {
+    allRounds = allRounds
+        && once(completeRound() == (round - 1) * 256)
+        && once(completeRound() == (round - 1) * 256 + 1)
+        && completeRound() == (round - 1) * 256 + 2
+}
+
+achievement(
+    title = "Nojitsu Master",
+    description = "Beat the game without using ninjitsu",
+    points = 5,
+    trigger = roundClear()
+      && allRounds
+      && noCheats()
+      && noNinjitsu
+)
+
+achievement(
+    title = "Shinobi",
+    description = "Beat the game on expert without using continues",
+    points = 5,
+    trigger = roundClear()
+      && allRounds
+      && noCheats()
+      && expertMode()
+      && noContinues()
+)
+
+
+// 9 LIVES (EXPERT)
+// ============================================================================
+
+achievement(
+    title = "9 Lives",
+    description = "Get 9 lives (expert mode)",
+    points = 5,
+    trigger =
+      lives() >= 9
+      && round() != 0
+      && once(lives() == 2)
+      && expertMode()
+)
+
+
+// collect shurikins
+// ============================================================================
+
+
+function collectShurikins(amount) {
+    shurikinAmountCondition = defShurikins() == defShurikinsAmount[0] && shurikins() >= amount
+
+    for defAmount in range(10, 70, 10) {
+        shurikinAmountCondition = shurikinAmountCondition
+            || defShurikins() == defShurikinsAmount[defAmount] && shurikins() >= defAmount + amount
+    }
+
+    achievement(
+        title = "Shurikin Collector "+ amount,
+        description = "Collect "+ amount +" shurikins plus the default amount",
+        points = 5,
+        trigger =
+          noCheats()
+          && ( shurikinAmountCondition )
+    )
+}
+
+collectShurikins(100)
+collectShurikins(200)
+collectShurikins(300)
 
 
 
 
 
-// - [ ] (7) finish each round no ninjitsu
+// ideas for sub-bosses
+// 1: (samurai) no jump, no damage, no shurikins, no ninjitsu
+// 2: (cavalo) no damage, no ninjitsu
+// 3: (cérebros) don't touch the floor (floor is lava)
+// 4: Surfing is a Martial Art
+// 5: (robô no fogo) drop kick only, no damage
+// 5: no damage, no ninjitsu
+
+
+
+
 // - (7) finish each boss no damage and no ninjitsu
 //   - (1) 1st boss no damage/shurikin/ninjitsu
 //   - (1) 4th boss surfboard no shurikin/ninjitsu/sword
 // - (7) defeat each sub-boss without getting hit (no shurikin/ninjitsu)
-// - (1) get 9 lives on expert mode
 // - (1) shinobi bonus (don't use a shurikin)
 // - (3) high score (>= normal)
-// - (3) collect (150/250/350) shurikins (starting with 50) (>= normal)
 // - (1) perfect bonus
-// - (1) beat the game without using ninjitsu
 // - (5) secret places
-
-
-
-
-
-
-
-
-
-
-
 
 
 
