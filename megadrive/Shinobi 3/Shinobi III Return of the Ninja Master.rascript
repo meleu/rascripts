@@ -67,7 +67,8 @@ function roundClear() => nextRound() > round()
 
 // $37B1: Continue (default is 3)
 function continuesLeft() => byte(0x37b1)
-function noContinues() => once(continuesLeft()) == 3 && never(continuesLeft() < prev(continuesLeft()))
+function noContinues() => never(continuesLeft() < prev(continuesLeft()))
+// TODO: detect game over (maybe lives == 0) for noContinues()
 
 
 // $37B6: (16bit) score x10e4
@@ -80,6 +81,7 @@ function lives() => byte(0x37e1)
 
 // $37E2: (16bit) Shurikins amount
 function shurikins() => word(0x37e2)
+function noShurikin() => never(shurikins() < prev(shurikins()))
 
 
 // $37E7: Ninjutsu amount
@@ -91,16 +93,14 @@ function usingFushinJitsu() => low4(0x4156) == 2
 // $415E: (16bit) non-zero = using ikazuchi ninjitsu (normally start with 4 and decreases as you got hit)
 function usingIkazuchiJitsu() => word(0x415e) > 0
 
-noNinjitsu = 
-    never(usingFushinJitsu())
-    && never(usingIkazuchiJitsu())
-    && never(ninjitsuAmount() == 0)
-    && never(move() == 0x40)
-
+function noNinjitsu() => never(usingFushinJitsu()) && never(usingIkazuchiJitsu()) && never(move() == 0x40) && never(move() == 0x44)
+    
 // $37E8: Health
 //        full = 10
 //        dead = 00
 function health() => byte(0x37e8)
+
+function noDamage() => never(health() < prev(health())) && never(move() == 0x28)
 
 
 // $37E6: Ninjutsu selected
@@ -123,12 +123,20 @@ function shinobiBonus() => never(byte(0x3d2a) == 1)
 //        03 = defending
 //        05 = using dagger (no power)
 //        06 = using sword (pow)
+//        07 = throwing shurikin
 //        08 = crouch
 //        0a = defending while crouching
+//        0c = kicking while crouching
 //        0d = using sword while crouching
+//        0e = throwing shurikin while crounching
 //        10 = jumping
 //        11 = while on double jump roll
+//        13 = using sword while jumping
+//        16 = throwing shurikin while jumping
 //        1a = walking
+//        20 = grabing the roof
+//        24 = throwing shurikin while grabing the roof
+//        28 = damage
 //        38 = surfing
 //        39 = shurikin while surfing
 //        3b = jumping while surfing
@@ -137,18 +145,72 @@ function shinobiBonus() => never(byte(0x3d2a) == 1)
 //        40 = using ninjitsu
 function move() => byte(0x415a)
 
-//function forbiddenMoves() {
-//  moves = [ 0x5, 0x6, 0xd, 0x39, 0x3d, 0x3f, 0x40 ]
-//  for item in moves {
-//    if(move == item)
-//      return false
-//  }
-//  return true
-//}
+function noJump() => never(move() == 0x10)
+
+function noStand() => never(move() == 0x01)
+    && never(move() == 0x1a)
+    && never(move() == 0x03)
+    && never(move() == 0x08)
+    && never(move() == 0x0a)
+    
+function surfBoardOnly() => never(move() == 0x39)
+    && never(move() == 0x3d)
+    && never(move() == 0x3f)
+    
+function dropKickOnly() => never(move() == 0x05)
+    && never(move() == 0x06)
+    && never(move() == 0x07)
+    && never(move() == 0x0c)
+    && never(move() == 0x0d)
+    && never(move() == 0x0e)
+    && never(move() == 0x13)
+    && never(move() == 0x16)
+    && noShurikin()
 
 // $F822: Music type
 //        (16bit) 0693 = sub-boss match
-function subBossStart() => once(byte(0xf822) != 0x0693) && once(byte(0xf822) != 0x0693)
+function music() => word(0xf822)
+function subBossStart() => once(prev(music()) != 0x0693)
+function subBossFinish() => prev(music()) == 0x0693 && music() == 0x6452
+
+
+// $414e: (16bit) ninja posX
+// $4152: (16bit) ninja posY
+// $e000: (16bit) background X
+// $e004: (16bit) background Y
+function ninjaPosX() => word(0x414e)
+function ninjaPosY() => word(0x4152)
+function bgPosX() => word(0xe000)
+function bgPosX() => word(0xe004)
+
+secretSpots = {
+  "s12a": [ 0x3a0, 0xc0, 0x2f8, 0x5f, 0x33f, 0x88, 0x291, 0x00 ],
+  "s12b": [ 0x718, 0x80, 0x6a8, 0x1f, 0x697, 0x48, 0x5e7, 0x00 ],
+  "s22":  [ 0x39d, 0x40, 0x32d, 0xfffe, 0x30f, 0x00, 0x25f, 0xffe8 ],
+  "s31":  [ 0x30f, 0x90, 0x29f, 0xffe8, 0x2e7, 0x68, 0x237, 0xffe7 ],
+  "s32":  [ 0xaf0, 0x100, 0xa80, 0x9f, 0xa4f, 0xc8, 0x99f, 0x68 ],
+  "s42L": [ 0x2d4, 0x88, 0x24f, 0xfffe, 0x28d, 0x0, 0x1dd, 0xffe8 ],
+  "s52a": [ 0xff, 0x180, 0x8f, 0xff, 0x51, 0x138, 0x0, 0xb8 ],
+  "s52b": [ 0x7f0, 0x1c0, 0x6c0, 0x120, 0x78b, 0x198, 0x6c0, 0x11a ],
+  "s52c": [ 0x7f0, 0x110, 0x6c0, 0x5f, 0x75b, 0xcf, 0x6ab, 0x5f ],
+  "s52d": [ 0x1e0, 0x670, 0xc0, 0x5af, 0x125, 0x648, 0x75, 0x588 ], 
+  "s72":  [ 0xabf, 0x80, 0xa4f, 0xffff, 0xa3f, 0x58, 0x98f, 0xffe8 ]
+}
+// 4 bottom right coordinates, 4 top left coordinates
+//secretSpot12a = [ 0x3a0, 0xc0, 0x2f8, 0x5f, 0x33f, 0x88, 0x291, 0x00 ]
+//secretSpot12b = [ 0x718, 0x80, 0x6a8, 0x1f, 0x697, 0x48, 0x5e7, 0x00 ]
+//secretSpot22  = [ 0x39d, 0x40, 0x32d, 0xfffe, 0x30f, 0x00, 0x25f, 0xffe8 ]
+//secretSpot31  = [ 0x30f, 0x90, 0x29f, 0xffe8, 0x2e7, 0x68, 0x237, 0xffe7 ]
+//secretSpot32  = [ 0xaf0, 0x100, 0xa80, 0x9f, 0xa4f, 0xc8, 0x99f, 0x68 ]
+//secretSpot42L = [ 0x2d4, 0x88, 0x24f, 0xfffe, 0x28d, 0x0, 0x1dd, 0xffe8 ]
+//secretSpot52a = [ 0xff, 0x180, 0x8f, 0xff, 0x51, 0x138, 0x0, 0xb8 ]
+//secretSpot52b = [ 0x7f0, 0x1c0, 0x6c0, 0x120, 0x78b, 0x198, 0x6c0, 0x11a ]
+//secretSpot52c = [ 0x7f0, 0x110, 0x6c0, 0x5f, 0x75b, 0xcf, 0x6ab, 0x5f ]
+//secretSpot52d = [ 0x1e0, 0x670, 0xc0, 0x5af, 0x125, 0x648, 0x75, 0x588 ] 
+//secretSpot72  = [ 0xabf, 0x80, 0xa4f, 0xffff, 0xa3f, 0x58, 0x98f, 0xffe8 ]
+
+
+
 
 // $41C4: 1st boss health
 function boss1HP() => byte(0x41c4)
@@ -215,13 +277,13 @@ function finishRound(round, noJitsu) {
   if(noJitsu == true) {
       name = "Nojitsu "+ round
       desc = desc +" without using Ninjitsu"
-      requirements = requirements && noNinjitsu
+      requirements = requirements && noNinjitsu()
   }
   
   achievement(
     title = name,
     description = desc ,
-    points = 5,
+    points = 1,
     trigger = requirements
   )
 }
@@ -245,29 +307,28 @@ finishRound(7, true)
 // BEAT THE GAME [NO NINJITSU / EXPERT + NO CONTINUES]
 // ============================================================================
 
+allRounds = roundClear()
 for round in range(1, 7) {
     allRounds = allRounds
         && once(completeRound() == (round - 1) * 256)
         && once(completeRound() == (round - 1) * 256 + 1)
-        && completeRound() == (round - 1) * 256 + 2
+        && once(completeRound() == (round - 1) * 256 + 2)
 }
 
 achievement(
     title = "Nojitsu Master",
     description = "Beat the game without using ninjitsu",
     points = 5,
-    trigger = roundClear()
-      && allRounds
+    trigger = allRounds
       && noCheats()
-      && noNinjitsu
+      && noNinjitsu()
 )
 
 achievement(
     title = "Shinobi",
     description = "Beat the game on expert without using continues",
-    points = 5,
-    trigger = roundClear()
-      && allRounds
+    points = 1,
+    trigger = allRounds
       && noCheats()
       && expertMode()
       && noContinues()
@@ -280,7 +341,7 @@ achievement(
 achievement(
     title = "9 Lives",
     description = "Get 9 lives (expert mode)",
-    points = 5,
+    points = 1,
     trigger =
       lives() >= 9
       && round() != 0
@@ -291,7 +352,6 @@ achievement(
 
 // collect shurikins
 // ============================================================================
-
 
 function collectShurikins(amount) {
     shurikinAmountCondition = defShurikins() == defShurikinsAmount[0] && shurikins() >= amount
@@ -304,7 +364,7 @@ function collectShurikins(amount) {
     achievement(
         title = "Shurikin Collector "+ amount,
         description = "Collect "+ amount +" shurikins plus the default amount",
-        points = 5,
+        points = 1,
         trigger =
           noCheats()
           && ( shurikinAmountCondition )
@@ -316,28 +376,246 @@ collectShurikins(200)
 collectShurikins(300)
 
 
+// HI SCORES
+// ============================================================================
+function hiScore(pts) {
+    adjective = {
+        50 : "Nice",
+        150: "Good",
+        300: "Awesome"
+    }
+    value = {
+        50 : 5,
+        150: 15,
+        300: 30        
+    }
+    achievement(
+        title = adjective[pts] +" Score",
+        description = "Get "+ pts +"k score (>= Normal)",
+        points = 1,
+        trigger = normalOrAbove()
+            && score10e4() > value[pts]
+            && score() > 0
+            && noCheats()
+    )
+}
+
+hiScore(50)
+hiScore(150)
+hiScore(300)
 
 
+// BOSS CHALLENGES
+// ============================================================================
 
 // ideas for sub-bosses
 // 1: (samurai) no jump, no damage, no shurikins, no ninjitsu
-// 2: (cavalo) no damage, no ninjitsu
-// 3: (cérebros) don't touch the floor (floor is lava)
-// 4: Surfing is a Martial Art
-// 5: (robô no fogo) drop kick only, no damage
-// 5: no damage, no ninjitsu
+// 2: (horse) no damage, no ninjitsu
+// 3: (little-brains) don't touch the floor (floor is lava)
+// 4: (surfing) damageless
+// 5: (robot on fire) drop kick only, no damage
+// 6: (eagle man) no damage, no ninjitsu
+
+function subBossChallenge(round) {
+    challenge = {
+        1: "Acrophobia",
+        2: "Like a Cowboy",
+        3: "The Floor is Lava",
+        4: "Surfing is a Martial Art",
+        5: "Drop Your Weapons",
+        6: "I Believe I Can Fly"
+    }
+    desc = {
+        1: "no jump, damage, shurikins, ninjitsu",
+        2: "no damage, ninjitsu",
+        3: "don't touch the floor, no ninjitsu",
+        4: "use only your surfboard",
+        5: "use only the drop kick move, no damage",
+        6: "no damage, ninjitsu"
+    }
+    roundID = {
+        1: 0x0000,
+        2: 0x0100,
+        3: 0x0200,
+        4: 0x0300,
+        5: 0x0400,
+        6: 0x0500
+    }
+
+    conditions = never(completeRound() != roundID[round])
+    if(round == 1) {
+        conditions = conditions && noJump() && noDamage() && noShurikin() && noNinjitsu()
+    } else if(round == 2 || round == 6) {
+        conditions = conditions && noDamage() && noNinjitsu()
+    } else if(round == 3) {
+        conditions = once(bgPosX() < 0xac0) && noStand() && noNinjitsu() && noDamage()
+    } else if(round == 4) {
+        conditions = conditions && surfBoardOnly()
+    } else if(round == 5) {
+        conditions = conditions && dropKickOnly() && noDamage() && noNinjitsu()
+    }
+
+    achievement(
+        title = challenge[round],
+        description = "Defeat sub-boss "+ round +" - "+ desc[round],
+        points = 1,
+        trigger = conditions
+            && subBossStart()
+            && subBossFinish()
+            && noCheats()
+    )
+}
+
+subBossChallenge(1)
+subBossChallenge(2)
+subBossChallenge(3)
+subBossChallenge(4)
+subBossChallenge(5)
+subBossChallenge(6)
 
 
 
 
 // - (7) finish each boss no damage and no ninjitsu
 //   - (1) 1st boss no damage/shurikin/ninjitsu
-//   - (1) 4th boss surfboard no shurikin/ninjitsu/sword
-// - (7) defeat each sub-boss without getting hit (no shurikin/ninjitsu)
+
+
+
+
+
+// SECRET SPOTS
+// ============================================================================
+
+function ninjaPosX() => word(0x414e)
+function ninjaPosY() => word(0x4152)
+function bgPosX() => word(0xe000)
+function bgPosY() => word(0xe004)
+
+secretSpots = {
+  "s12a": [ 0x3a0, 0xc0, 0x2f8, 0x5f, 0x33f, 0x88, 0x291, 0x00 ],
+  "s12b": [ 0x718, 0x80, 0x6a8, 0x1f, 0x697, 0x48, 0x5e7, 0x00 ],
+  "s22":  [ 0x39d, 0x40, 0x32d, 0xfffe, 0x30f, 0x00, 0x25f, 0xffe8 ],
+//  "s31":  [ 0x30f, 0x90, 0x29f, 0xffe8, 0x2e7, 0x68, 0x237, 0xffe7 ],
+  "s32":  [ 0xaf0, 0x100, 0xa80, 0x9f, 0xa4f, 0xc8, 0x99f, 0x68 ],
+  "s42L": [ 0x2d4, 0x88, 0x24f, 0xfffe, 0x28d, 0x0, 0x1dd, 0xffe8 ],
+  "s52a": [ 0xff, 0x180, 0x8f, 0xff, 0x51, 0x138, 0x0, 0xb8 ],
+  "s52b": [ 0x7f0, 0x1c0, 0x6c0, 0x120, 0x78b, 0x198, 0x6c0, 0x11a ],
+  "s52c": [ 0x7f0, 0x110, 0x6c0, 0x5f, 0x75b, 0xcf, 0x6ab, 0x5f ],
+  "s52d": [ 0x1e0, 0x670, 0xc0, 0x5af, 0x125, 0x648, 0x75, 0x588 ], 
+  "s72":  [ 0xabf, 0x80, 0xa4f, 0xffff, 0xa3f, 0x58, 0x98f, 0xffe8 ]
+}
+
+
+for spot in secretSpots
+{
+    cheevoTitle = "Secret Spot "
+
+    posCondition =
+        ninjaPosX()    <= secretSpots[spot][0]
+        && ninjaPosY() <= secretSpots[spot][1]
+        && bgPosX()    <= secretSpots[spot][2]
+        && bgPosY()    <= secretSpots[spot][3]
+        && ninjaPosX() >= secretSpots[spot][4]
+        && ninjaPosY() >= secretSpots[spot][5]
+        && bgPosX()    >= secretSpots[spot][6]
+        && bgPosY()    >= secretSpots[spot][7]
+
+    if(spot == "s12a" || spot == "s12b")
+    {
+        posCondition = posCondition
+            && completeRound() == 0x0001
+
+        if(spot == "s12a") {
+            cheevoTitle = cheevoTitle + "1a"
+            spotDesc = "first "
+        }
+        else {
+            cheevoTitle = cheevoTitle + "1b"
+            spotDesc = "second "
+        }
+
+        spotDesc = spotDesc +"secret spot on round 1"
+    }
+    else if(spot == "s22")
+    {
+        cheevoTitle = cheevoTitle + "2"
+
+        posCondition = posCondition
+            && completeRound() == 0x0101
+            
+        spotDesc = "secret spot on round 2"
+    }
+    else if(spot == "s32")
+    {
+        cheevoTitle = cheevoTitle + "3"
+
+        posCondition = posCondition
+            && completeRound() == 0x0201
+            
+        spotDesc = "secret spot on round 3"
+    }
+    else if(spot == "s42L")
+    {
+        cheevoTitle = cheevoTitle + "4"
+
+        posCondition = posCondition
+            && completeRound() == 0x0301
+            && lives() > prev(lives())
+            
+        spotDesc = "secret spot on round 4 and get the extra life"
+    }
+    else if(spot == "s52a" || spot == "s52b" || spot == "s52c" || spot == "s52d")
+    {
+        posCondition = posCondition
+            && completeRound() == 0x0401
+
+        if(spot == "s52a") {
+            cheevoTitle = cheevoTitle + "5a"
+            spotDesc = "first "
+        } else if(spot == "s52b") {
+            cheevoTitle = cheevoTitle + "5b"
+            spotDesc = "second "
+        } else if(spot == "s52c") {
+            cheevoTitle = cheevoTitle + "5c"
+            spotDesc = "third "
+        } else {
+            cheevoTitle = cheevoTitle + "5d"
+            spotDesc = "fourth "
+        }
+
+        spotDesc = spotDesc +"secret spot on round 5"
+    }
+    else if(spot == "s72")
+    {
+        cheevoTitle = cheevoTitle + "7"
+
+        posCondition = posCondition
+            && completeRound () == 0x0601
+            
+        spotDesc = "secret spot on round 7"
+    }
+    
+    achievement(
+        title = cheevoTitle,
+        description = "Find the "+ spotDesc,
+        points = 1,
+        trigger = noCheats()
+            && posCondition
+    )
+}
+
+
+
+
+
+
+
+
+
+
+
 // - (1) shinobi bonus (don't use a shurikin)
-// - (3) high score (>= normal)
 // - (1) perfect bonus
-// - (5) secret places
 
 
 
